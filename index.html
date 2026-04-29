@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Iron Circle">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="manifest" href="manifest.json">
+<title>Iron Circle — Throw Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-logo">IRON <span>CIRCLE</span></div>
+  <div class="nav-date" id="nav-date"></div>
+</div>
+
+<div class="main">
+
+  <!-- ===== LOG PAGE ===== -->
+  <div class="page active" id="page-log">
+
+    <div class="section">
+      <div class="section-title">Pre-Session</div>
+
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="session-date">
+      </div>
+
+      <div class="form-group">
+        <label>Implement / Weight</label>
+        <select id="implement">
+          <option value="16lb_6kg">16 lb / 6 kg (NCAA)</option>
+          <option value="shot_7.26">7.26 kg (International)</option>
+          <option value="shot_5kg">5 kg (Training)</option>
+          <option value="shot_4kg">4 kg (Light)</option>
+          <option value="disc_2kg">Discus 2 kg</option>
+          <option value="disc_1.6kg">Discus 1.6 kg</option>
+          <option value="disc_1kg">Discus 1 kg (Light)</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Session Type</label>
+        <select id="session-type">
+          <option value="competition">Competition</option>
+          <option value="technical">Technical / Drill</option>
+          <option value="volume">High Volume</option>
+          <option value="power">Power / Heavy</option>
+          <option value="speed">Speed / Light</option>
+          <option value="meet_sim">Meet Simulation</option>
+          <option value="recovery">Recovery / Easy</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <div class="slider-row">
+          <div class="slider-label">Sleep Quality</div>
+          <div class="slider-val" id="sleep-val">7</div>
+        </div>
+        <input type="range" min="1" max="10" value="7" id="sleep-quality" oninput="document.getElementById('sleep-val').textContent=this.value">
+      </div>
+
+      <div class="form-group">
+        <div class="slider-row">
+          <div class="slider-label">CNS / Fatigue Level</div>
+          <div class="slider-val" id="cns-val">5</div>
+        </div>
+        <input type="range" min="1" max="10" value="5" id="cns-fatigue" oninput="document.getElementById('cns-val').textContent=this.value">
+        <div class="range-labels"><span>Fresh</span><span>Wrecked</span></div>
+      </div>
+
+      <div class="form-group">
+        <div class="slider-row">
+          <div class="slider-label">Pre-session Arousal</div>
+          <div class="slider-val" id="arousal-val">6</div>
+        </div>
+        <input type="range" min="1" max="10" value="6" id="arousal-pre" oninput="document.getElementById('arousal-val').textContent=this.value">
+        <div class="range-labels"><span>Flat</span><span>Wired</span></div>
+      </div>
+
+      <div class="form-group">
+        <label>Caffeine (mg)</label>
+        <input type="number" id="caffeine" placeholder="0" min="0">
+      </div>
+
+      <div class="form-group">
+        <label>Conditions</label>
+        <select id="conditions">
+          <option value="indoor">Indoor</option>
+          <option value="ideal">Outdoor — Ideal</option>
+          <option value="cold">Cold / Wind Unfavorable</option>
+          <option value="hot">Hot / Humid</option>
+          <option value="wind_favorable">Wind Favorable</option>
+          <option value="rain">Rain / Wet</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- THROWS -->
+    <div class="section">
+      <div class="section-title">Throws</div>
+      <div class="form-group">
+        <label>Add Throw (meters)</label>
+        <div class="input-row">
+          <input type="number" id="throw-dist" placeholder="e.g. 18.24" step="0.01" min="0">
+          <select id="throw-type">
+            <option value="glide">Glide</option>
+            <option value="rotational">Rotational</option>
+            <option value="standing">Standing</option>
+            <option value="drill">Drill</option>
+          </select>
+        </div>
+        <input type="text" id="throw-note" placeholder="Note (optional)" style="margin-top:6px;">
+        <button class="btn btn-secondary" style="margin-top:8px;" onclick="addThrow()">+ Add Throw</button>
+      </div>
+      <div id="throw-list"></div>
+    </div>
+
+    <!-- POST SESSION -->
+    <div class="section">
+      <div class="section-title">Post-Session</div>
+
+      <div class="form-group">
+        <label>In-session arousal</label>
+        <div class="feel-row" id="feel-arousal">
+          <button class="feel-btn" data-val="1" onclick="selectFeel('feel-arousal',this)">Flat</button>
+          <button class="feel-btn" data-val="2" onclick="selectFeel('feel-arousal',this)">Low</button>
+          <button class="feel-btn" data-val="3" onclick="selectFeel('feel-arousal',this)">Good</button>
+          <button class="feel-btn" data-val="4" onclick="selectFeel('feel-arousal',this)">High</button>
+          <button class="feel-btn" data-val="5" onclick="selectFeel('feel-arousal',this)">Wired</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Technique Feel</label>
+        <div class="feel-row" id="feel-tech">
+          <button class="feel-btn" data-val="1" onclick="selectFeel('feel-tech',this)">Poor</button>
+          <button class="feel-btn" data-val="2" onclick="selectFeel('feel-tech',this)">Off</button>
+          <button class="feel-btn" data-val="3" onclick="selectFeel('feel-tech',this)">Okay</button>
+          <button class="feel-btn" data-val="4" onclick="selectFeel('feel-tech',this)">Sharp</button>
+          <button class="feel-btn" data-val="5" onclick="selectFeel('feel-tech',this)">Locked</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Physical Feel</label>
+        <div class="feel-row" id="feel-body">
+          <button class="feel-btn" data-val="1" onclick="selectFeel('feel-body',this)">Rough</button>
+          <button class="feel-btn" data-val="2" onclick="selectFeel('feel-body',this)">Tight</button>
+          <button class="feel-btn" data-val="3" onclick="selectFeel('feel-body',this)">Okay</button>
+          <button class="feel-btn" data-val="4" onclick="selectFeel('feel-body',this)">Good</button>
+          <button class="feel-btn" data-val="5" onclick="selectFeel('feel-body',this)">Great</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Pain / Discomfort (0 = none)</label>
+        <div class="slider-row">
+          <input type="range" min="0" max="10" value="0" id="pain-level" oninput="document.getElementById('pain-val').textContent=this.value" style="flex:1;">
+          <div class="slider-val" id="pain-val">0</div>
+        </div>
+        <input type="text" id="pain-location" placeholder="Location (e.g. left SI, knee)" style="margin-top:6px;">
+      </div>
+
+      <div class="form-group">
+        <label>Session Notes</label>
+        <textarea id="session-notes" placeholder="Key cues, what clicked, what didn't, coaching feedback..."></textarea>
+      </div>
+    </div>
+
+    <!-- LIFTING -->
+    <div class="section">
+      <div class="section-title">Lifting</div>
+
+      <!-- Quick-add from favorites -->
+      <div id="quick-add-bar" style="display:none;">
+        <div class="section-title" style="margin-bottom:8px;">Quick Add (Recent)</div>
+        <div id="quick-add-chips"></div>
+      </div>
+
+      <div id="lift-list"></div>
+      <button class="add-lift-btn" onclick="openExercisePicker()">+ Add Exercise</button>
+    </div>
+
+    <div class="section">
+      <button class="btn btn-primary" onclick="saveSession()">Save Session</button>
+    </div>
+  </div>
+
+  <!-- ===== HISTORY PAGE ===== -->
+  <div class="page" id="page-history">
+    <div class="section">
+      <div class="section-title">Session History</div>
+      <div id="history-list">
+        <div class="empty"><div class="empty-icon">📋</div>No sessions logged yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STATS PAGE ===== -->
+  <div class="page" id="page-stats">
+    <div class="section">
+      <div class="section-title">Overview</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-val pr-val" id="stat-pr">—</div>
+          <div class="stat-label">All-Time PR</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-sessions">0</div>
+          <div class="stat-label">Sessions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-avg">—</div>
+          <div class="stat-label">Season Avg Best</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-throws">0</div>
+          <div class="stat-label">Total Throws</div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Progress (Last 10 Sessions)</div>
+      <canvas id="progress-chart" height="160" style="width:100%;margin-top:8px;"></canvas>
+    </div>
+    <div class="section">
+      <div class="section-title">Trend Analysis</div>
+      <div id="trend-analysis" style="font-size:13px;color:var(--text2);line-height:1.8;"></div>
+    </div>
+  </div>
+
+  <!-- ===== AI PAGE ===== -->
+  <div class="page" id="page-ai">
+    <div class="section">
+      <div class="section-title">AI Training Analysis</div>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:16px;line-height:1.6;">
+        Analyzes all logged sessions — performance trends, recovery, arousal patterns, lifting correlation. Hit the button when ready.
+      </p>
+      <div style="margin-bottom:12px;">
+        <label>Focus Area</label>
+        <select id="ai-focus">
+          <option value="overall">Overall Progress Review</option>
+          <option value="technique">Technique & Consistency</option>
+          <option value="recovery">Recovery & CNS Management</option>
+          <option value="arousal">Arousal & Competition Readiness</option>
+          <option value="lifting">Lifting & Strength Transfer</option>
+          <option value="injury">Injury / Pain Patterns</option>
+          <option value="peaking">Peaking Strategy</option>
+        </select>
+      </div>
+      <button class="btn btn-ai" onclick="runAIAnalysis()">◈ Analyze My Training</button>
+      <div id="ai-output" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('log',this)">
+    <div class="tab-icon">✦</div>LOG
+  </button>
+  <button class="tab-btn" onclick="switchTab('history',this)">
+    <div class="tab-icon">◎</div>HISTORY
+  </button>
+  <button class="tab-btn" onclick="switchTab('stats',this)">
+    <div class="tab-icon">◈</div>STATS
+  </button>
+  <button class="tab-btn" onclick="switchTab('ai',this)">
+    <div class="tab-icon">◆</div>AI
+  </button>
+</div>
+
+<!-- EXERCISE PICKER MODAL -->
+<div class="modal-overlay" id="exercise-modal" onclick="closeExercisePicker(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Exercise</div>
+      <button class="modal-close" onclick="closeExercisePickerDirect()">✕</button>
+    </div>
+    <input type="text" id="ex-search" placeholder="Search or type custom..." oninput="filterExercises(this.value)" style="margin-bottom:12px;">
+    <div class="section-title" style="margin-bottom:8px;">Favorites</div>
+    <div id="fav-list" style="margin-bottom:16px;"></div>
+    <div class="section-title" style="margin-bottom:8px;">All Exercises</div>
+    <div id="ex-list"></div>
+    <button class="btn btn-secondary" style="margin-top:12px;" onclick="addCustomExercise()">+ Add Custom</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="app.js"></script>
+<script src="ai.js"></script>
+</body>
+</html>
